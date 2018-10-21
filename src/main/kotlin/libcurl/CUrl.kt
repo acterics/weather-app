@@ -3,7 +3,6 @@ package libcurl
 import kotlinx.cinterop.*
 import platform.posix.*
 import platform.posix.size_t
-import libcurl.*
 
 class CUrl(val url: String)  {
     val stableRef = StableRef.create(this)
