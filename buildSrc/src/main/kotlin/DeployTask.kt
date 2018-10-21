@@ -30,8 +30,8 @@ open class DeployTask: Exec() {
 
 
 fun Project.withDeployTask(ip: String) {
-    val deployProvider = tasks.register("deployToRaspberryPi", DeployTask::class.java) {
+    val deployProvider = tasks.create("deployToRaspberryPi", DeployTask::class.java) {
         ipAddress = ip
     }
-    deployProvider.get().dependsOn(tasks.getByName("build"))
+    deployProvider.dependsOn(tasks.getByName("build"))
 }
