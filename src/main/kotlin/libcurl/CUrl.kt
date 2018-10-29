@@ -64,3 +64,16 @@ fun write_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, use
     return size * nitems
 }
 
+typealias Mapper<T> = (json: String) -> T
+
+fun <T>fetch(url: String, mapper: Mapper<T>): T? {
+    val curl = CUrl(url)
+    var result: T? = null
+    curl.body += { body ->
+        result = mapper(body)
+    }
+    curl.fetch()
+    curl.close()
+    return result
+}
+
