@@ -37,5 +37,3 @@ sourceSets.getByName("main").component {
 withDeployTask(RASPBERRY_IP)
 
 
-
-
