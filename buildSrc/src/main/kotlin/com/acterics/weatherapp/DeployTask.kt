@@ -1,3 +1,5 @@
+package com.acterics.weatherapp
+
 import org.gradle.api.*
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.*
@@ -6,16 +8,16 @@ open class DeployTask: Exec() {
 
     init {
         group = "deploy"
-        description = "Deploy build binaries to raspberry pi"
+        description = "Deploy sources to raspberry pi"
     }
 
     lateinit var ipAddress: String
 
     override fun exec() {
-        val buildDirPath = "${project.buildDir}/exe/main/debug/executable/linux_arm32_hfp/"
+        val buildDirPath = "${project.rootDir.absolutePath}/dist/"
         val sshAddress = "pi@${ipAddress}"
-        val raspberryDestPath = "/home/pi/Projects/kotlin-native/hello-world/"
-        println("Deploying build binaries to raspberry pi")
+        val raspberryDestPath = "/home/pi/Projects/kotlin-native/${project.name}/"
+        println("Deploying sources to raspberry pi")
         println("Raspberry PI ip address: $ipAddress")
 
         println("Raspberry PI build dir: $buildDirPath")
@@ -30,8 +32,8 @@ open class DeployTask: Exec() {
 
 
 fun Project.withDeployTask(ip: String) {
-    val deployProvider = tasks.create("deployToRaspberryPi", DeployTask::class.java) {
+    val deployTask = tasks.create("deployToRaspberryPi", DeployTask::class.java) {
         ipAddress = ip
     }
-    deployProvider.dependsOn(tasks.getByName("build"))
+    deployTask.dependsOn(tasks.getByName("packSources"))
 }
