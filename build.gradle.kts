@@ -1,12 +1,13 @@
 import org.jetbrains.kotlin.gradle.plugin.experimental.internal.KotlinNativeMainComponent
 import org.jetbrains.kotlin.gradle.plugin.experimental.internal.KotlinNativeMainComponent.Companion.EXECUTABLE
+import com.acterics.weatherapp.*
 
 repositories {
     jcenter()
 }
 
 plugins {
-    id("org.jetbrains.kotlin.platform.native") version Versions.kotlinNative
+    id("org.jetbrains.kotlin.platform.native") version "1.3.0-rc-146"
 }
 
 val RASPBERRY_IP = this.property("com.acterics.raspberry_pi_ip").toString()
@@ -33,7 +34,7 @@ sourceSets.getByName("main").component {
 }
 
 
-
+withPackTask()
 withDeployTask(RASPBERRY_IP)
 
 
