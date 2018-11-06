@@ -70,7 +70,12 @@ fun <T>fetch(url: String, mapper: Mapper<T>): T? {
     val curl = CUrl(url)
     var result: T? = null
     curl.body += { body ->
-        result = mapper(body)
+        try {
+            result = mapper(body)
+        } catch(e: Exception) {
+            e.printStackTrace()
+        }
+        
     }
     curl.fetch()
     curl.close()

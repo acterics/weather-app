@@ -4,6 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "build:x64",
+            "type": "shell",
+            "command": "./gradlew compileDebugExecutableLinux_x64KotlinNative",
+            "problemMatcher": []
+        },
+        {
+            "label": "run",
+            "type": "shell",
+            "command": "./build/exe/main/debug/executable/linux_x64/weather-app.kexe",
+            "problemMatcher": []
+        },
+        {
             "label": "build:arm",
             "type": "shell",
             "command": "make",

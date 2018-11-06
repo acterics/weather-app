@@ -18,6 +18,8 @@ internal fun CPointer<cJSON>?.doubleValue() = this?.pointed?.valuedouble ?: 0.0
 
 internal fun CPointer<cJSON>?.stringValue() = jsonStringValue(this)?.toKString() ?: ""
 
+internal fun <T>CPointer<cJSON>?.objectValue(mapper: (String) -> T): T? = this?.let { mapper(it.stringValue()) }
+
 internal operator fun CPointer<cJSON>.get(key: String): CPointer<cJSON>? {
     return jsonObjectItem(this, key)
 }
