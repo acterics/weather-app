@@ -4,21 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "docker:build-compiler-image",
+            "label": "build:arm",
             "type": "shell",
-            "command": "docker build -t acterics/arm-compiler .",
+            "command": "make",
             "problemMatcher": []
         },
-        // {
-        //     "label": "docker:build-app",
-        //     "type": "shell",
-        //     "command": "docker build -t acterics/weather-app .",
-        //     "problemMatcher": []
-        // },
         {
-            "label": "docker:run-compiler",
+            "label": "deploy:raspberry",
             "type": "shell",
-            "command": "docker run acterics/arm-compiler",
+            "command": "./gradlew deployToRaspberryPi",
             "problemMatcher": []
         }
     ]

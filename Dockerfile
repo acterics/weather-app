@@ -1,10 +1,11 @@
 FROM ubuntu:16.04
-RUN apt-get update
-RUN apt-get install --reinstall binutils
-RUN apt-get install -y wget
-RUN apt-get install -y xz-utils
-RUN apt-get install -y make
-RUN apt-get install -y cmake
+RUN apt-get update \
+    && apt-get install --reinstall binutils \
+    && apt-get install -y wget \
+    && apt-get install -y xz-utils \
+    && apt-get install -y make \
+    && apt-get install -y cmake \
+    && apt-get install -y libcurl4-openssl-dev
 
 # Arm toolchain
 ENV arch x86_64
@@ -13,8 +14,6 @@ ENV linaro_toolchain gcc-linaro-7.3.1-2018.05-${arch}_${target_arch}
 
 RUN wget https://releases.linaro.org/components/toolchain/binaries/latest-7/${target_arch}/${linaro_toolchain}.tar.xz
 RUN tar -xJf /${linaro_toolchain}.tar.xz
-
-
 
 COPY arm.cmake arm.cmake
 
@@ -42,13 +41,12 @@ RUN export TOOLCHAIN_PATH=/${linaro_toolchain} \
 RUN make install
 
 # Install curl
-
 WORKDIR /
 ENV curl_version 7.61.1
 ENV curl_folder curl-${curl_version}
+
 RUN wget https://github.com/curl/curl/releases/download/curl-7_61_1/${curl_folder}.tar.gz
 RUN tar -xzf /${curl_folder}.tar.gz
-RUN apt-get install -y libcurl4-openssl-dev
 
 WORKDIR /${curl_folder}
 RUN export CC=/${linaro_toolchain}/bin/arm-linux-gnueabihf-gcc \
@@ -56,24 +54,33 @@ RUN export CC=/${linaro_toolchain}/bin/arm-linux-gnueabihf-gcc \
 RUN make && make install
 
 WORKDIR /
+
 # Kotlin native
+
+RUN apt-get install -y default-jdk
+
+ENV version 0.9.3
+ENV kotlin_native kotlin-native-linux-${version}
+
+RUN wget https://download-cf.jetbrains.com/kotlin/native/builds/releases/${version}/linux/${kotlin_native}.tar.gz
+RUN tar xzf ${kotlin_native}.tar.gz
+
+COPY ./test/main.kt main.kt
+RUN /${kotlin_native}/bin/kotlinc-native main.kt
+
+# Cinterop
+
+COPY ./src/main/c_interop /cinterop/def
+RUN /${kotlin_native}/bin/cinterop -def /cinterop/def/cjson.def -o /cinterop/cjson -target linux_arm32_hfp
+RUN /${kotlin_native}/bin/cinterop -def /cinterop/def/libcurl.def -o /cinterop/libcurl -target linux_arm32_hfp
+
+# Compile project
 COPY . /app
 WORKDIR /app
 
-RUN apt-get install -y default-jdk
-RUN ./gradlew compileReleaseExecutableLinux_arm32_hfpKotlinNative
-# RUN ls ./build
-# ENV version 0.9.3
-# ENV kotlin_native kotlin-native-linux-${version}
-
-# RUN wget https://download-cf.jetbrains.com/kotlin/native/builds/releases/${version}/linux/${kotlin_native}.tar.gz
-# RUN tar xzf ${kotlin_native}.tar.gz
-
-
-
-# RUN export PATH=$PATH:/${kotlin_native}/bin \
-#     && make cinterop \
-#     && make compile-arm
+RUN /${kotlin_native}/bin/kotlinc-native -p program ./src -l cjson.klib -l libcurl.klib -r /cinterop -o weather-app -verbose -opt -target linux_arm32_hfp
+RUN mkdir -p bin \
+    && mv ./weather-app.kexe ./bin
 
 ENTRYPOINT ["bash", "-c"]
 

@@ -8,13 +8,9 @@ import libcurl.fetch
 
 fun main(args: Array<String>) {
     val currentLocation = fetch<Location>("http://ip-api.com/json", LocationMapper::map)
-    println(currentLocation)
+    println("Hello from ${currentLocation?.city}, ${currentLocation?.country}")
 }
 
-
-fun cache(fileName: String, json: String) {
-
-}
 
 
 

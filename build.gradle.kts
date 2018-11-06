@@ -33,8 +33,6 @@ sourceSets.getByName("main").component {
     }
 }
 
-
-withPackTask()
 withDeployTask(RASPBERRY_IP)
 
 

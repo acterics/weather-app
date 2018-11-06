@@ -35,5 +35,4 @@ fun Project.withDeployTask(ip: String) {
     val deployTask = tasks.create("deployToRaspberryPi", DeployTask::class.java) {
         ipAddress = ip
     }
-    deployTask.dependsOn(tasks.getByName("packSources"))
 }
