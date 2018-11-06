@@ -1,10 +1,34 @@
 all: cinterop compile
 
 JAVA_OPTS=-Xmx256M
+TARGET_ARM=linux_arm32_hfp
+TARGET=linux_x64
+CINTEROP_BUILD_PATH=./build/cinterop
+TMP_DIR=$(shell pwd)/tmp
+
+CJSON_DOWNLOAD_LINK=https://github.com/DaveGamble/cJSON/archive/v1.7.8.tar.gz
+CJSON_DEPENDENCY=cjson
+CJSON_CMAKE_FLAGS="-DENABLE_CJSON_UTILS=On -DENABLE_CJSON_TEST=Off"
+
+CURL_DOWNLOAD_LINK=https://github.com/curl/curl/releases/download/curl-7_61_1/curl-7.61.1.tar.gz
+CURL_DEPENDENCY=curl
+
+KOTLIN_NATIVE_VERSION=0.9.3
+KOTLIN_NATIVE_FOLDER=kotlin-native-linux-$(KOTLIN_NATIVE_VERSION)
+
+docker-build-arm:
+	docker run --name temp-container acterics/arm-compiler /bin/true
+	docker cp temp-container:/app/build/exe/main/release/executable/linux_arm32_hfp/weather-app.kexe $(shell pwd)/bin
+	docker rm temp-container
+
+compile-arm:
+	kotlinc-native -p program ./src -l cjson.klib -l libcurl.klib -r build/cinterop -o weather-app -verbose -opt -target $(TARGET_ARM)
+	mkdir -p bin
+	mv ./weather-app.kexe ./bin
 
 compile:
 	export JAVA_OPTS=$(JAVA_OPTS)
-	kotlinc-native -p program ./src -l cjson.klib -l libcurl.klib -r build/cinterop -o weather-app -verbose -opt -java_opts "-Xmx256M"
+	kotlinc-native -p program ./src -l cjson.klib -l libcurl.klib -r build/cinterop -o weather-app -verbose -opt -target $(TARGET)
 	mkdir -p bin
 	mv ./weather-app.kexe ./bin
 
@@ -14,38 +38,11 @@ test:
 
 cinterop: cjson-interop libcurl-interop
 
-# sudo required
-install: cjson-install libcurl-install
-
-CINTEROP_BUILD_PATH=./build/cinterop
-TMP_DIR=$(shell pwd)/tmp
-
 cjson-interop:
 	cinterop -def ./src/main/c_interop/cjson.def -o $(CINTEROP_BUILD_PATH)/cjson
 
-	
-CJSON_DOWNLOAD_LINK=https://github.com/DaveGamble/cJSON/archive/v1.7.8.tar.gz
-CJSON_DEPENDENCY=cjson
-CJSON_CMAKE_FLAGS="-DENABLE_CJSON_UTILS=On -DENABLE_CJSON_TEST=Off"
-
-cjson-install:
-	mkdir -p $(TMP_DIR)
-	./scripts/build-dependency.sh $(CJSON_DEPENDENCY) $(CJSON_DOWNLOAD_LINK) $(TMP_DIR) $(CJSON_CMAKE_FLAGS)
-	rm -rf $(TMP_DIR)
-
 libcurl-interop:
 	cinterop -def ./src/main/c_interop/libcurl.def -o $(CINTEROP_BUILD_PATH)/libcurl
-
-CURL_DOWNLOAD_LINK=https://github.com/curl/curl/releases/download/curl-7_61_1/curl-7.61.1.tar.gz
-CURL_DEPENDENCY=curl
-
-libcurl-install:
-	mkdir -p $(TMP_DIR)
-	./scripts/build-dependency.sh $(CURL_DEPENDENCY) $(CURL_DOWNLOAD_LINK) $(TMP_DIR)
-	rm -rf $(TMP_DIR)
-	
-KOTLIN_NATIVE_VERSION=0.9.3
-KOTLIN_NATIVE_FOLDER=kotlin-native-linux-$(KOTLIN_NATIVE_VERSION)
 
 install-kotlinc-native:
 	mkdir -p $(HOME)/kotlin-native

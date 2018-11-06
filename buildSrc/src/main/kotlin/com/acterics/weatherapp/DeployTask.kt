@@ -14,9 +14,9 @@ open class DeployTask: Exec() {
     lateinit var ipAddress: String
 
     override fun exec() {
-        val buildDirPath = "${project.rootDir.absolutePath}/dist/"
+        val buildDirPath = "${project.rootDir.absolutePath}/bin/"
         val sshAddress = "pi@${ipAddress}"
-        val raspberryDestPath = "/home/pi/Projects/kotlin-native/${project.name}/"
+        val raspberryDestPath = "/home/pi/Projects/kotlin-native/${project.name}/bin"
         println("Deploying sources to raspberry pi")
         println("Raspberry PI ip address: $ipAddress")
 
@@ -24,7 +24,7 @@ open class DeployTask: Exec() {
         println("SSH address: $sshAddress")
         println("Raspberry destination path: $raspberryDestPath")
 
-        commandLine = listOf("bash", "-c", "rsync -rvz $buildDirPath $sshAddress:$raspberryDestPath")
+        commandLine = listOf("bash", "-c", "rsync -rvz --ignore-times $buildDirPath $sshAddress:$raspberryDestPath")
         super.exec()
     }
 

@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker:build-compiler-image",
+            "type": "shell",
+            "command": "docker build -t acterics/arm-compiler .",
+            "problemMatcher": []
+        },
+        // {
+        //     "label": "docker:build-app",
+        //     "type": "shell",
+        //     "command": "docker build -t acterics/weather-app .",
+        //     "problemMatcher": []
+        // },
+        {
+            "label": "docker:run-compiler",
+            "type": "shell",
+            "command": "docker run acterics/arm-compiler",
+            "problemMatcher": []
+        }
+    ]
+}
