@@ -1,4 +1,4 @@
-package com.acterics
+package com.acterics.model
 
 data class Weather(
     val main: MainWeatherData

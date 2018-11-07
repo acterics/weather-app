@@ -1,4 +1,4 @@
-package libcurl
+package com.acterics.libcurl
 
 typealias EventHandler<T> = (T) -> Unit
 class Event<T : Any> {

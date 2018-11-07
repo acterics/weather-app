@@ -1,4 +1,17 @@
-package libcurl
+package com.acterics.libcurl
+
+import libcurl.curl_easy_init as curlInit
+import libcurl.curl_easy_setopt as curtSetOption
+import libcurl.curl_easy_cleanup as curlCleanup
+import libcurl.curl_easy_perform as curlPerform
+import libcurl.curl_easy_strerror as curlGetError
+import libcurl.CURLOPT_URL
+import libcurl.CURLOPT_HEADERFUNCTION
+import libcurl.CURLOPT_HEADERDATA
+import libcurl.CURLOPT_WRITEFUNCTION
+import libcurl.CURLOPT_WRITEDATA
+import libcurl.CURLOPT_NOBODY
+import libcurl.CURLE_OK
 
 import kotlinx.cinterop.*
 import platform.posix.*
@@ -7,33 +20,34 @@ import platform.posix.size_t
 class CUrl(val url: String)  {
     val stableRef = StableRef.create(this)
 
-    val curl = curl_easy_init();
+    val curl = curlInit();
 
     init {
-        curl_easy_setopt(curl, CURLOPT_URL, url)
+        curtSetOption(curl, CURLOPT_URL, url)
         val header = staticCFunction(::header_callback)
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header)
-        curl_easy_setopt(curl, CURLOPT_HEADERDATA, stableRef.asCPointer())
+        curtSetOption(curl, CURLOPT_HEADERFUNCTION, header)
+        curtSetOption(curl, CURLOPT_HEADERDATA, stableRef.asCPointer())
         val write_data = staticCFunction(::write_callback)
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data)
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, stableRef.asCPointer())
+        curtSetOption(curl, CURLOPT_WRITEFUNCTION, write_data)
+        curtSetOption(curl, CURLOPT_WRITEDATA, stableRef.asCPointer())
     }
 
     val header = Event<String>()
     val body = Event<String>()
 
     fun nobody(){
-        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L)
+        curtSetOption(curl, CURLOPT_NOBODY, 1L)
     }
 
     fun fetch() {
-        val res = curl_easy_perform(curl)
-        if (res != CURLE_OK)
-            println("curl_easy_perform() failed: ${curl_easy_strerror(res)?.toKString()}")
+        val res = curlPerform(curl)
+        if (res != CURLE_OK) {
+            throw NetworkException(curlGetError(res)?.toKString() ?: "Undefiend error")
+        }
     }
 
     fun close() {
-        curl_easy_cleanup(curl)
+        curlCleanup(curl)
         stableRef.dispose()
     }
 }
@@ -70,14 +84,18 @@ fun <T>fetch(url: String, mapper: Mapper<T>): T? {
     val curl = CUrl(url)
     var result: T? = null
     curl.body += { body ->
-        try {
-            result = mapper(body)
-        } catch(e: Exception) {
-            e.printStackTrace()
-        }
-        
+        result = mapper(body)        
     }
-    curl.fetch()
+    try {
+        curl.fetch()
+    } catch(e: NetworkException) {
+        println("Network exception: ")
+        println(e.message)
+    } catch(e: Exception) {
+        println("Unknown exception: ")
+        println(e)
+    }
+    
     curl.close()
     return result
 }

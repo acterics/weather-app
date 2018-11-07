@@ -1,7 +1,7 @@
 package com.acterics.cjson
 
 import cjson.cJSON_Delete as deleteObject
-import com.acterics.Location
+import com.acterics.model.Location
 
 
 object LocationMapper {

@@ -1,7 +1,7 @@
 package com.acterics.cjson
 
-import com.acterics.Weather
-import com.acterics.MainWeatherData
+import com.acterics.model.Weather
+import com.acterics.model.MainWeatherData
 import cjson.cJSON_Delete as deleteObject
 
 object WeatherMapper {
