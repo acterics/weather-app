@@ -1,4 +1,4 @@
-package com.acterics
+package com.acterics.libcurl
 
 object API {
     val IP_API = IpApi
