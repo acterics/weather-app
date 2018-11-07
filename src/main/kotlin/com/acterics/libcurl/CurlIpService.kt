@@ -8,9 +8,13 @@ import com.acterics.model.Location
 import com.acterics.cjson.LocationMapper
 
 class CurlIpService: IpService {
+    companion object {
+        private const val ROOT = "http://ip-api.com"
+    }
+
     override fun getLocation(): Location? {
         return try {
-            fetch(API.IP_API.location, LocationMapper::map)
+            fetch("$ROOT/json", LocationMapper::map)
         } catch(e: Exception) {
             println(e)
             null

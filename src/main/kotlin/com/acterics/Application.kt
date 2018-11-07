@@ -17,12 +17,14 @@ class Application {
             println("Cannot fetch current location")
             return
         }
+        println("Hello from ${location.city}, ${location.country}")
         val weather = weatherService.getWeather(location)
         if (weather == null) {
             println("Cannot fetch weather yet")
-        } else {
-            println("Today temperature is ${weather.main.temp} °C.")
-        }        
+            return 
+        }
+        println("Today temperature is ${weather.main.temp} °C.")
+        println("Goobye!")
 
     }
 }
